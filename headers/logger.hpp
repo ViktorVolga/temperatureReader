@@ -46,8 +46,7 @@ static void initSHTReaderLogger(){
     SHTReaderLogger_ptr = std::make_shared<spdlog::async_logger>("SHTReaderLogger", sink_list.begin(), sink_list.end(), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
 
     SHTReaderLogger_ptr->set_level(spdlog::level::debug);
-
-    
+    spdlog::register_logger(SHTReaderLogger_ptr);
 }
 
 static const std::shared_ptr<spdlog::async_logger>& SHTLogger(){
