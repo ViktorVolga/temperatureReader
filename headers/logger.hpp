@@ -29,27 +29,26 @@ enum class logLevel : int {
 };
 
 
-static std::shared_ptr<spdlog::async_logger> SHTReaderLogger_ptr;
+static std::unique_ptr<spdlog::logger> SHTReaderLogger_ptr;
 static std::once_flag initFlag;
 
 static void initSHTReaderLogger(){
-    spdlog::init_thread_pool(8192, 1);
     spdlog::sink_ptr console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     console_sink->set_level(spdlog::level::debug);
 
-    spdlog::sink_ptr file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("/home/root/SHTReader.log", 1024*1024*10, 3);
+    spdlog::sink_ptr file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("/home/root/SHTReader.log", true);
     file_sink->set_level(spdlog::level::debug);
 
     spdlog::sinks_init_list sink_list = { file_sink, console_sink }; 
         
-    //spdlog::logger logger("SHTReaderLogger", sink_list.begin(), sink_list.end());
-    SHTReaderLogger_ptr = std::make_shared<spdlog::async_logger>("SHTReaderLogger", sink_list.begin(), sink_list.end(), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
+    spdlog::logger logger("SHTReaderLogger", sink_list.begin(), sink_list.end());
 
-    SHTReaderLogger_ptr->set_level(spdlog::level::debug);
-    spdlog::register_logger(SHTReaderLogger_ptr);
+    logger.set_level(spdlog::level::debug);
+
+    SHTReaderLogger_ptr = std::make_unique<spdlog::logger>(logger);
 }
 
-static const std::shared_ptr<spdlog::async_logger>& SHTLogger(){
+static const std::unique_ptr<spdlog::logger>& SHTLogger(){
     std::call_once(initFlag, initSHTReaderLogger);
     return SHTReaderLogger_ptr;
 }
