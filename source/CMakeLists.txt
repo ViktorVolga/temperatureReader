@@ -13,3 +13,6 @@ add_library(w1 w1.cpp)
 target_link_libraries(w1 ds2482)
 
 add_library(tSensor tSensor.cpp)
+
+add_library(logger logger.cpp)
+target_link_libraries(logger spdlog::spdlog)

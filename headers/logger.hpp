@@ -1,5 +1,6 @@
 #ifndef SHTLOGGER_H
 #define SHTLOGGER_H
+
 #include <iostream>
 #include "spdlog/spdlog.h"
 #include "spdlog/async.h" //support for async logging.
@@ -39,7 +40,7 @@ static void initSHTReaderLogger(){
     spdlog::sink_ptr file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("/home/root/SHTReader.log", true);
     file_sink->set_level(spdlog::level::debug);
 
-    spdlog::sinks_init_list sink_list = { file_sink, console_sink }; 
+    spdlog::sinks_init_list sink_list = { file_sink, console_sink };
         
     spdlog::logger logger("SHTReaderLogger", sink_list.begin(), sink_list.end());
 
@@ -64,21 +65,20 @@ class loggerInterface{
     std::string _logFilepath;
     std::function<void(const spdlog::details::log_msg &msg)> _callBack;
 public:
-    loggerInterface(std::string & logFilePath,
-                    logLevel level,
-                    int maxFileSize = 1048576 * 5,
-                    int maxFiles = 10,
-                    bool logToConsole = false,
-                    std::function<void(const spdlog::details::log_msg &msg)> callBack = nullptr);
-    virtual const std::unique_ptr<spdlog::async_logger>& logger() = 0;
-    virtual ~loggerInterface();    
+    loggerInterface();
+    virtual const std::shared_ptr<spdlog::async_logger>& logger() = 0;
+    virtual ~loggerInterface();
 };
 
 class TemperatureReaderLogger : loggerInterface{
-    static std::unique_ptr<spdlog::async_logger> _logger;
+    static std::shared_ptr<spdlog::async_logger> _logger;
     static std::once_flag _initFlag;
+    static std::shared_ptr<spdlog::details::thread_pool> _threadPool;
 public:
-    const std::unique_ptr<spdlog::async_logger>& logger() override;
+    TemperatureReaderLogger();
+    const std::shared_ptr<spdlog::async_logger>& logger() override;
+private:
+    static void initLogger();
 };
 
 
