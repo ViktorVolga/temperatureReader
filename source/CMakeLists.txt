@@ -1,3 +1,11 @@
+if(CMAKE_YOCTO_BUILD)
+    set(IS_YOCTO_BUILD TRUE)
+    message(STATUS "Yocto build detected")
+else()
+    set(IS_YOCTO_BUILD FALSE)
+    message(STATUS "Local build detected")
+endif()
+
 find_package(spdlog REQUIRED)
 
 add_library(ds2482 ds2482.cpp)
@@ -14,18 +22,38 @@ add_library(tSensor tSensor.cpp)
 add_library(logger logger.cpp)
 target_link_libraries(logger spdlog::spdlog)
 
-include(FetchContent)
-FetchContent_Declare(
-    nlohmann_json 
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG        v3.10.5)
+if(IS_YOCTO_BUILD)
+    find_library(FMT_LIB fmt)
+    if(FMT_LIB)
+        message(STATUS "Found fmt library: ${FMT_LIB}")
+        link_libraries(${FMT_LIB})
+    else()
+        message(FATAL_ERROR "fmt library not found")
+    endif()
 
-FetchContent_MakeAvailable(nlohmann_json)
+    find_path(NLOHMANN_JSON_INCLUDE_DIR
+        NAMES json.hpp nlohmann/json.hpp
+        PATHS ${CMAKE_INSTALL_PREFIX}/include
+        /usr/include
+        /usr/local/include
+    )
+else()
+    include(FetchContent)
+    FetchContent_Declare(
+        nlohmann_json 
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG        v3.12.0)
+    FetchContent_MakeAvailable(nlohmann_json)
+endif()
 
 include_directories(${nlohmann_json_SOURCE_DIR}/include)
 
 add_library(config config.cpp)
-target_link_libraries(config PUBLIC nlohmann_json::nlohmann_json)
+if(IS_YOCTO_BUILD)
+    target_include_directories(config PRIVATE ${NLOHMANN_JSON_INCLUDE_DIR})
+else()
+    target_link_libraries(config PUBLIC nlohmann_json::nlohmann_json)
+endif()
 
 add_library(i2c-io i2c-io.cpp)
 target_link_libraries(i2c-io spdlog::spdlog config)
@@ -36,17 +64,24 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.78 COMPONENTS program_options locale system
 REQUIRED) 
 
-include_directories(
-    ${STAGING_INCDIR}/nlohmann
-)
-
 add_library(connectionContext connectionContext.cpp)
-target_link_libraries(connectionContext PUBLIC
-                    nlohmann_json::nlohmann_json
-                    Boost::locale
-                    Boost::system
-                    Boost::program_options
-                    )
+if(IS_YOCTO_BUILD)
+    target_link_libraries(connectionContext PUBLIC
+                        Boost::locale
+                        Boost::system
+                        Boost::program_options
+                        )
+    target_include_directories(connectionContext PRIVATE ${NLOHMANN_JSON_INCLUDE_DIR})
+else()
+    target_link_libraries(connectionContext PUBLIC
+                        nlohmann_json::nlohmann_json
+                        nlohmann_json
+                        Boost::locale
+                        Boost::system
+                        Boost::program_options
+                        )
+
+endif()
 
 add_library(dataSource dataSource.cpp)
 target_link_libraries(dataSource PUBLIC connectionContext)
