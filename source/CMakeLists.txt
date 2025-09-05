@@ -33,7 +33,7 @@ target_link_libraries(i2c-io spdlog::spdlog config)
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost 1.83 COMPONENTS program_options locale system
+find_package(Boost 1.78 COMPONENTS program_options locale system
 REQUIRED) 
 
 add_library(connectionContext connectionContext.cpp)
