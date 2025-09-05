@@ -1,8 +1,10 @@
 #pragma once
 
-#include "../headers/w1.hpp"
 #include "../headers/ds2482.hpp"
 #include "../headers/RomFinder.hpp"
+#include <cstdint>
+#include <memory>
+#include <string>
 
 enum class W1Commands : uint8_t{
     readROM = 0x33,
@@ -23,15 +25,16 @@ enum class W1MemoryCommands : uint8_t{
 
 class w1BussInterface{
 public:
+    virtual ~w1BussInterface() = default;
     virtual void resetBuss() = 0;
     virtual float readTemperature(const std::string & ROM) = 0;
 };
 
-class w1Buss : w1BussInterface{
-    std::unique_ptr<DS2482> _ds2482;
-    std::unique_ptr<RomFinder> _romFinder;
+class w1Buss : public w1BussInterface{
+    DS2482* m_ds2482;
+    std::unique_ptr<RomFinder> m_romFinder;
 public:
-    w1Buss();
+    w1Buss(DS2482* m_ds2482);
     void resetBuss() override;
     float readTemperature(const std::string & ROM) override;
 };

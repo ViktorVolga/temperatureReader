@@ -41,11 +41,12 @@ enum class SRBD { // Status Register Bit Definitions
 class DS2482{
     const std::string m_logPrefix{"[ds2482] "};
     bool m_activePullUp = false;
-    std::unique_ptr<i2cIO> m_ds2482;
+    std::weak_ptr<i2cIO> m_ds2482;
     uint8_t m_config;
     REGISTER m_readPtr;
 public:
     DS2482();
+    DS2482(std::weak_ptr<i2cIO> && io);
     uint8_t calculate_config(uint8_t config);
     bool selectRegister(REGISTER reg);
 

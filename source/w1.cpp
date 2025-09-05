@@ -1,22 +1,22 @@
 #include "../headers/w1.hpp"
 #include "../headers/logger.hpp"
 
-w1Buss::w1Buss()
+w1Buss::w1Buss(DS2482* ds2482)
 {
     SHTLogger()->trace("[w1Buss()] start");
     /*todo -read params from config module*/
-    _ds2482 = std::make_unique<DS2482>();
-    _romFinder = std::make_unique<RomFinder>(_ds2482.get());
+    m_ds2482 = ds2482;
+    m_romFinder = std::make_unique<RomFinder>(ds2482);
     SHTLogger()->trace("[w1Buss()] end");
 }
 
 void w1Buss::resetBuss()
 {
     SHTLogger()->trace("[resetBuss()] start");
-    if(_ds2482 && _ds2482->W1ResetBus())
+    if(m_ds2482 && m_ds2482->W1ResetBus())
         SHTLogger()->trace("buss reset -ok");
     else{
-        if(!_ds2482){
+        if(!m_ds2482){
             SHTLogger()->error("_ds2482 - nullptr");
             return;
         }
@@ -30,24 +30,24 @@ float w1Buss::readTemperature(const std::string & ROM)
     SHTLogger()->trace("readTemperature()] start, ROM [{}]", ROM);
     resetBuss();
     //_ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::matchRom));
-    _ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::scipRom));
+    m_ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::scipRom));
     //for(const auto & c : ROM)
     //    _ds2482->W1Writebit(c == '1');
-    _ds2482->W1WriteByte(static_cast<uint8_t>(W1MemoryCommands::convertT));
+    m_ds2482->W1WriteByte(static_cast<uint8_t>(W1MemoryCommands::convertT));
     
     resetBuss();
     //_ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::matchRom));
-    _ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::scipRom));
+    m_ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::scipRom));
     //for(const auto & c : ROM)
     //    _ds2482->W1Writebit(c == '1');
-    _ds2482->W1WriteByte(static_cast<uint8_t>(W1MemoryCommands::readScratchpad));
+    m_ds2482->W1WriteByte(static_cast<uint8_t>(W1MemoryCommands::readScratchpad));
     std::vector<uint8_t> rawTemperature;
     int count = 0;
     while (count <= 8)
     {
         count += 1;
         /*todo -add here error cheking*/
-        rawTemperature.push_back(static_cast<uint8_t>(_ds2482->W1ReadByte()));
+        rawTemperature.push_back(static_cast<uint8_t>(m_ds2482->W1ReadByte()));
     }
     resetBuss();
     float temperature = 0;

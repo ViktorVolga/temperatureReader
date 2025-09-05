@@ -12,6 +12,18 @@ extern "C" {
     #include <linux/i2c-dev.h>
 }
 
+bool i2cId::operator<(const i2cId & other) const
+{
+    if (other.m_buss == m_buss)
+    {
+        return m_address < other.m_address;
+    }
+    else
+    {
+        return m_buss < other.m_buss;
+    }
+}
+
 i2cIO::i2cIO(std::string && fileName)
 {
     SHTLogger()->trace("i2cIO::i2cIO() - start");
@@ -84,4 +96,15 @@ ssize_t i2cIO::readByteFromAddress(uint8_t address)
         SHTLogger()->trace("readed byte [{}] from address [{}] - ok", readedValue, (int)address);
         return readedValue;
     }
+}
+
+bool i2cIO::operator<(const i2cIO &other) const
+{
+    if(_context and other._context)
+        return _context->m_i2cBuss < other._context->m_i2cBuss;
+    else
+    {
+        /* todo later report error*/
+    }
+    return false;
 }
