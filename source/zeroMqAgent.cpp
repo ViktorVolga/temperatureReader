@@ -14,9 +14,17 @@ TemperaturePublisher::TemperaturePublisher(ConnectionType connectionType, std::s
         case ConnectionType::ipc:
             zmq::context_t context(1);
             m_context = std::move(context);
-            zmq::socket_t socket(context, zmq::socket_type::pub);
+            zmq::socket_t socket(m_context, zmq::socket_type::pub);
             m_socket = std::move(socket);
-            m_socket.bind("ipc" + address);
+            std::string fullAddress = "ipc://" + address;
+            try
+            {
+                m_socket.bind(fullAddress);
+            }
+            catch(const zmq::error_t& e)
+            {
+                SHTLogger()->error("full adress {}", fullAddress);
+            }
             SHTLogger()->info("Created ipc publisher with address {}", address);
             break;
     }
