@@ -95,3 +95,44 @@ target_link_libraries(connectionHandler PUBLIC dataSource ds2482 w1)
 
 add_library(app app.cpp)
 target_link_libraries(app PUBLIC programOptions config connectionHandler)
+
+
+if(IS_YOCTO_BUILD)
+    find_package(ZeroMQ REQUIRED)
+    set(SOBJECTIZER_INCLUDE_DIR "/usr/include")
+    message(STATUS "Using system SObjectizer from Yocto")
+else()
+    FetchContent_Declare(
+      libzmq
+      GIT_REPOSITORY https://github.com/zeromq/libzmq.git
+      GIT_TAG v4.3.4
+    )
+    FetchContent_Declare(
+    cppzmq
+    GIT_REPOSITORY https://github.com/zeromq/cppzmq.git
+    GIT_TAG v4.9.0
+    )
+
+    FetchContent_MakeAvailable(libzmq cppzmq)
+
+    FetchContent_Declare(
+    sobjectizer
+    GIT_REPOSITORY https://github.com/Stiffstream/sobjectizer.git
+    GIT_TAG v5.8.4
+    )
+
+    FetchContent_MakeAvailable(sobjectizer)
+endif()
+
+add_library(zeroMqAgent zeroMqAgent.cpp)
+if(IS_YOCTO_BUILD)
+    target_link_libraries(zeroMqAgent libzmq)
+else()
+    target_link_libraries(zeroMqAgent libzmq cppzmq)
+    target_include_directories(zeroMqAgent PRIVATE 
+        ${cppzmq_SOURCE_DIR}
+        ${libzmq_SOURCE_DIR}/include
+    )
+endif()
+
+target_link_libraries(app PUBLIC zeroMqAgent)

@@ -4,7 +4,7 @@
 float tSensorInterface::getCurrentTemperature()
 {
     SHTLogger()->trace("getCurrentTemperature()");
-    const std::lock_guard<std::mutex> lock(_mutex);    
+    const std::lock_guard<std::mutex> lock(_mutex);
     return _currentT;
 }
 

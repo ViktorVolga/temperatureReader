@@ -1,6 +1,7 @@
 #include "../headers/app.hpp"
 #include "../headers/programOptions.hpp"
 #include "../headers/logger.hpp"
+#include "../headers/zeroMqAgent.hpp"
 
 #include <thread>
 #include <chrono>
@@ -29,12 +30,14 @@ void Application::run()
         SHTLogger()->error("{}, buss 0x01, address 0x18", ec.what());
     }
     std::string rom{""};
+    TemperaturePublisher publisher(ConnectionType::ipc, "//temperature");
     while(true)
     {
         if(auto buss = bussPtr.lock())
         {
             using namespace std::chrono_literals;
             auto temperature = buss->readTemperature(rom);
+            publisher.publish(temperature);
             std::this_thread::sleep_for(1s);
         }
         else
