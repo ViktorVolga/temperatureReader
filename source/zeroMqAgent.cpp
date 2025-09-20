@@ -9,25 +9,29 @@ TemperaturePublisher::TemperaturePublisher(ConnectionType connectionType, std::s
         SHTLogger()->error("adress should be not empty");
         return;
     }
+    std::string fullAddress;
     switch(connectionType)
     {
         case ConnectionType::ipc:
-            zmq::context_t context(1);
-            m_context = std::move(context);
-            zmq::socket_t socket(m_context, zmq::socket_type::pub);
-            m_socket = std::move(socket);
-            std::string fullAddress = "ipc://" + address;
-            try
-            {
-                m_socket.bind(fullAddress);
-            }
-            catch(const zmq::error_t& e)
-            {
-                SHTLogger()->error("full adress {}", fullAddress);
-            }
-            SHTLogger()->info("Created ipc publisher with address {}", address);
+            fullAddress = "ipc://" + address;
+            break;
+        case ConnectionType::tcp:
+            fullAddress = "tcp://*:" + address;
             break;
     }
+    zmq::context_t context(1);
+    m_context = std::move(context);
+    zmq::socket_t socket(m_context, zmq::socket_type::pub);
+    m_socket = std::move(socket);
+    try
+    {
+        m_socket.bind(fullAddress);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    SHTLogger()->info("Created publisher with address {}", address);
 }
 
 void TemperaturePublisher::publish(float temperature)
