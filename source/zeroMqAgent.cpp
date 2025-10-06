@@ -13,7 +13,7 @@ TemperaturePublisher::TemperaturePublisher(ConnectionType connectionType, std::s
     switch(connectionType)
     {
         case ConnectionType::ipc:
-            fullAddress = "ipc://" + address;
+            fullAddress = "ipc:///" + address;
             break;
         case ConnectionType::tcp:
             fullAddress = "tcp://*:" + address;

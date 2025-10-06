@@ -30,7 +30,7 @@ void Application::run()
         SHTLogger()->error("{}, buss 0x01, address 0x18", ec.what());
     }
     std::string rom{""};
-    TemperaturePublisher publisher(ConnectionType::tcp, "6666");
+    TemperaturePublisher publisher(ConnectionType::ipc, "temperature");
     while(true)
     {
         if(auto buss = bussPtr.lock())
