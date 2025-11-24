@@ -46,3 +46,16 @@ void TemperaturePublisher::publish(float temperature)
         SHTLogger()->error("erorr with sendidng temperature");
     }
 }
+
+void TemperaturePublisher::publish(std::string & temperatureMessage)
+{
+    zmq::message_t  message(temperatureMessage);
+    if(m_socket.send(message, zmq::send_flags::dontwait))
+    {
+        SHTLogger()->info("sended temperatureMessage");
+    }
+    else
+    {
+        SHTLogger()->error("erorr with sendidng temperature");
+    }
+}

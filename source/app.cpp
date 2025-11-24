@@ -2,6 +2,7 @@
 #include "../headers/programOptions.hpp"
 #include "../headers/logger.hpp"
 #include "../headers/zeroMqAgent.hpp"
+#include "../headers/messageHandler.hpp"
 
 #include <thread>
 #include <chrono>
@@ -31,13 +32,19 @@ void Application::run()
     }
     std::string rom{""};
     TemperaturePublisher publisher(ConnectionType::ipc, "temperature");
+    uint64_t deviceId = 666;
+    MessageHandler messageHandler(deviceId);
     while(true)
     {
         if(auto buss = bussPtr.lock())
         {
             using namespace std::chrono_literals;
             auto temperature = buss->readTemperature(rom);
-            publisher.publish(temperature);
+            static std::string temperatureMessage;
+            temperatureMessage.clear();
+            boost::system::error_code ec;
+            messageHandler.prepare_message(777, temperature, MessageTypes::Temperature, temperatureMessage, ec);
+            publisher.publish(temperatureMessage);
             std::this_thread::sleep_for(1s);
         }
         else

@@ -21,5 +21,6 @@ class TemperaturePublisher : private boost::noncopyable
 public:
     TemperaturePublisher(ConnectionType connectionType, std::string adress);
     void publish(const float temperature);
+    void publish(std::string& temperatureMessage);
 };
 
