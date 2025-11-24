@@ -137,12 +137,13 @@ endif()
 target_link_libraries(app PUBLIC zeroMqAgent)
 
 find_package(Protobuf REQUIRED)
+include_directories(${Protobuf_INCLUDE_DIRS})
 
 set(PROTO_FILES ../proto/messages.proto)
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 add_library(messageHandler messageHandler.cpp ${PROTO_SRCS})
 target_link_libraries(messageHandler ${Protobuf_LIBRARIES} Boost::system)
-target_include_directories(messageHandler PRIVATE ${Protobuf_INCLUDE_DIRS})
+target_include_directories(messageHandler PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(app PUBLIC messageHandler)

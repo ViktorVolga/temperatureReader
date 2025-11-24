@@ -1,5 +1,5 @@
 #include "../headers/messageHandler.hpp"
-#include "../proto/messages.pb.h"
+#include "messages.pb.h"
 
 #include <chrono>
 
