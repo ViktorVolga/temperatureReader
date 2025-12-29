@@ -39,7 +39,12 @@ void Application::run()
         if(auto buss = bussPtr.lock())
         {
             using namespace std::chrono_literals;
+            std::chrono::time_point<std::chrono::steady_clock> before = std::chrono::steady_clock::now();
             auto temperature = buss->readTemperature(rom);
+            std::chrono::time_point<std::chrono::steady_clock> after = std::chrono::steady_clock::now();
+            const std::chrono::duration<double> duration {after - before};
+            auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
+            SHTLogger()->info("temperature measurement time {}", nanoseconds);
             static std::string temperatureMessage;
             temperatureMessage.clear();
             boost::system::error_code ec;

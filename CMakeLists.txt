@@ -19,6 +19,5 @@ add_executable(
     ${CMAKE_CURRENT_SOURCE_DIR}/source/main.cpp
 )
 
-
 target_link_libraries(sh-temperature-reader ds2482 RomFinder w1 logger config app)
 install(TARGETS sh-temperature-reader RUNTIME DESTINATION bin)
