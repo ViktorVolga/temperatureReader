@@ -27,7 +27,7 @@ enum class PTR_VALUES {
     PTR_CODE_CONFIG = 0xC3,
 };
 
-enum class SRBD { // Status Register Bit Definitions    
+enum class SRBD { // Status Register Bit Definitions
     STS_DIR = 0x80,
     STS_TSB = 0x40,
     TS_SBR = 0x20,
@@ -47,11 +47,12 @@ public:
     virtual ssize_t wait1WireIdle() = 0;
     virtual ssize_t W1TouchBit(bool bit) = 0;
     virtual void  W1Writebit(bool bit) = 0;
-    virtual uint8_t W1Triplet(bool bit) = 0;
+    virtual ssize_t W1Triplet(bool bit) = 0;
     virtual ssize_t W1ReadByte() = 0;
     virtual void W1WriteByte(uint8_t byte) = 0;
     virtual bool W1ResetBus() = 0;
     virtual bool waitConvertTComplete() = 0;
+    virtual void W1WriteByteToAddress(uint8_t addr, uint8_t byte) = 0;
 };
 
 class DS2482 : public iDS2482
@@ -89,7 +90,7 @@ public:
             bit - The direction to choose if both branches are valid
             Return:	b0=read1 b1=read2 b3=bit written
     */
-    uint8_t W1Triplet(bool bit) override;
+    ssize_t W1Triplet(bool bit) override;
 
     /*
         Performs the write byte function.
@@ -109,6 +110,8 @@ public:
     */
     bool W1ResetBus() override;
     bool waitConvertTComplete() override { return true; };
+
+    void W1WriteByteToAddress(uint8_t addr, uint8_t byte) override;
 };
 
 class MockDS2482 : public iDS2482
@@ -119,9 +122,10 @@ public:
     ssize_t wait1WireIdle() override { return 0; };
     ssize_t W1TouchBit(bool bit) override { return 0; };
     void  W1Writebit(bool bit) override {};
-    uint8_t W1Triplet(bool bit) override { return 0; };
+    ssize_t W1Triplet(bool bit) override { return 0; };
     ssize_t W1ReadByte() override { return 0; };
     void W1WriteByte(uint8_t byte) override {};
     bool W1ResetBus() override { return true; };
     bool waitConvertTComplete() override { return true; };
+    void W1WriteByteToAddress(uint8_t addr, uint8_t byte) override {};
 };

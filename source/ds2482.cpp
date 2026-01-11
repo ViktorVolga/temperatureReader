@@ -30,6 +30,10 @@ bool DS2482::selectRegister(REGISTER reg)
         if (auto io = m_ds2482.lock())
             return io->writeByteToAddress(static_cast<uint8_t>(COMMANDS::SET_READ_POINTER), static_cast<uint8_t>(reg));
     }
+    else
+    {
+        SHTLogger()->trace("no need to select register already on {}", static_cast<int>(reg));
+    }
     return true;
 }
 
@@ -99,7 +103,7 @@ void  DS2482::W1Writebit(bool bit){
     }
 }
 
-uint8_t DS2482::W1Triplet(bool bit)
+ssize_t DS2482::W1Triplet(bool bit)
 {
     wait1WireIdle();
     if(bit)
@@ -141,4 +145,13 @@ bool DS2482::W1ResetBus()
     if(auto io = m_ds2482.lock())
         io->writeByte(static_cast<uint8_t>(COMMANDS::ONE_WIRE_RESET));
     return (wait1WireIdle() & 0x02);
+}
+
+void DS2482::W1WriteByteToAddress(uint8_t addr, uint8_t byte)
+{
+    if(auto io = m_ds2482.lock())
+    {
+        io->writeByteToAddress(addr, byte);
+    }
+
 }

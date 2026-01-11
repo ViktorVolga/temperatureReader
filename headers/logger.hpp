@@ -35,16 +35,16 @@ static std::once_flag initFlag;
 
 static void initSHTReaderLogger(){
     spdlog::sink_ptr console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    console_sink->set_level(spdlog::level::debug);
+    console_sink->set_level(spdlog::level::trace);
 
-    spdlog::sink_ptr file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("~/00_repos/temperatureReader/build/SHTReader.log", true);
-    file_sink->set_level(spdlog::level::debug);
+//    spdlog::sink_ptr file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("/var/log/sh/sh-temperature-reader.log", true);
+//    file_sink->set_level(spdlog::level::debug);
 
-    spdlog::sinks_init_list sink_list = { file_sink, console_sink };
+    spdlog::sinks_init_list sink_list = { console_sink };
         
     spdlog::logger logger("SHTReaderLogger", sink_list.begin(), sink_list.end());
 
-    logger.set_level(spdlog::level::debug);
+    logger.set_level(spdlog::level::trace);
 
     SHTReaderLogger_ptr = std::make_unique<spdlog::logger>(logger);
 }

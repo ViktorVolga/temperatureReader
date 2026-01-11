@@ -55,7 +55,7 @@ bool Filei2cIO::writeByte(uint8_t byte)
         SHTLogger()->error("i2c_smbus_write_byte return error");
         return false;
     }
-    SHTLogger()->trace("Filei2cIO::writeByte - write byte [{}] - ok");
+    SHTLogger()->trace("Filei2cIO::writeByte - write byte [{}] - ok", byte);
     return true;
 }
 

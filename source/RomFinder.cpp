@@ -1,5 +1,6 @@
 #include "../headers/RomFinder.hpp"
 #include "../headers/logger.hpp"
+#include "../headers/w1.hpp"
 
 CandidateToRom::CandidateToRom(uint64_t rom, uint8_t lastBit)
 {
@@ -79,6 +80,10 @@ void RomFinder::resolveAnswer(ssize_t answer)
 
 void RomFinder::findRoms()
 {
+    if (auto ds2482 = m_ds2482.lock())
+    {
+        ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::matchRom));
+    }
     while(true)
     {
         if (auto ds2482 = m_ds2482.lock())
@@ -100,6 +105,11 @@ void RomFinder::findRoms()
             if(m_currentRound > m_romsForVerification.size())
             {
                 break;
+            }
+            if (auto ds2482 = m_ds2482.lock())
+            {
+                ds2482->W1ResetBus();
+                ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::matchRom));
             }
         }
     }

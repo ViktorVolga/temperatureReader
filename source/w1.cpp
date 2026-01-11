@@ -7,6 +7,7 @@ w1Buss::w1Buss(std::shared_ptr<iDS2482> ds2482)
     /*todo -read params from config module*/
     m_ds2482 = ds2482;
     m_romFinder = std::make_unique<RomFinder>(ds2482);
+    resetBuss();
     m_romFinder->findRoms();
     SHTLogger()->trace("[w1Buss()] end");
 }
