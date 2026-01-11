@@ -33,14 +33,15 @@ void ConnectionHandler::addDataSource(const DataSource* dataSource)
             }
             if(m_i2cBusses.count(context->m_i2cBuss) == 0){
                 std::string ioFileName = "/dev/SH_TEMPERATURE_READER";
-                m_i2cBusses[context->m_i2cBuss] = std::make_shared<i2cIO>(std::move(ioFileName));
+                m_i2cBusses[context->m_i2cBuss] = std::make_shared<Filei2cIO>(std::move(ioFileName));
                 i2cId id(context->m_i2cBuss, context->m_address);
-                if(m_ds2482Map.count(id) == 0 && dataSource->m_masterDevice == "ds2482"){
+                if(m_ds2482Map.count(id) == 0 && dataSource->m_masterDevice == "ds2482")
+                {
                     m_ds2482Map[id] = std::make_shared<DS2482>(std::weak_ptr<i2cIO>(m_i2cBusses[context->m_i2cBuss]));
                 }
                 if(dataSource->m_type == "w1Buss" and m_w1Busses.count(id) == 0)
                 {
-                    m_w1Busses[id] = std::make_shared<w1Buss>(m_ds2482Map[id].get());
+                    m_w1Busses[id] = std::make_shared<w1Buss>(m_ds2482Map[id]);
                 }
             }
             break;

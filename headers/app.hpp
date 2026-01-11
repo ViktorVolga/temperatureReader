@@ -8,7 +8,7 @@
 
 class Application
 {
-    std::unique_ptr<ConnectionHandler> connHandler;
+    std::shared_ptr<ConnectionHandler> connectionHandler;
     std::unique_ptr<Config> _config;
 public:
     Application(int argc, char * argv[]);

@@ -18,7 +18,7 @@
 class ConnectionHandler
 {
     std::map<uint8_t /*i2c-buss*/, std::shared_ptr<i2cIO>> m_i2cBusses;
-    std::map<i2cId, std::shared_ptr<DS2482>> m_ds2482Map;
+    std::map<i2cId, std::shared_ptr<iDS2482>> m_ds2482Map;
     std::map<i2cId, std::shared_ptr<w1Buss>> m_w1Busses;
 public:
     ConnectionHandler() {};

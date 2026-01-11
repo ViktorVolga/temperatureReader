@@ -31,10 +31,10 @@ public:
 };
 
 class w1Buss : public w1BussInterface{
-    DS2482* m_ds2482;
+    std::weak_ptr<iDS2482> m_ds2482;
     std::unique_ptr<RomFinder> m_romFinder;
 public:
-    w1Buss(DS2482* m_ds2482);
+    w1Buss(std::shared_ptr<iDS2482> m_ds2482);
     void resetBuss() override;
     float readTemperature(const std::string & ROM) override;
 };

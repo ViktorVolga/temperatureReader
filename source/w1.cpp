@@ -1,53 +1,65 @@
 #include "../headers/w1.hpp"
 #include "../headers/logger.hpp"
 
-w1Buss::w1Buss(DS2482* ds2482)
+w1Buss::w1Buss(std::shared_ptr<iDS2482> ds2482)
 {
     SHTLogger()->trace("[w1Buss()] start");
     /*todo -read params from config module*/
     m_ds2482 = ds2482;
     m_romFinder = std::make_unique<RomFinder>(ds2482);
+    m_romFinder->findRoms();
     SHTLogger()->trace("[w1Buss()] end");
 }
 
 void w1Buss::resetBuss()
 {
     SHTLogger()->trace("[resetBuss()] start");
-    if(m_ds2482 && m_ds2482->W1ResetBus())
-        SHTLogger()->trace("buss reset -ok");
-    else{
-        if(!m_ds2482){
-            SHTLogger()->error("_ds2482 - nullptr");
-            return;
+    if (auto ds2482 = m_ds2482.lock())
+    {
+        if (ds2482->W1ResetBus())
+        {
+            SHTLogger()->trace("buss reset -ok");
         }
-        SHTLogger()->error("buss reset - error");
+        else
+        {
+            /*to do later - here can be more readable log with buss adress*/
+            SHTLogger()->error("buss reset - error");
+        }
     }
-    SHTLogger()->trace("[resetBuss()] end");
+    else
+    {
+        SHTLogger()->error("ds2482 - nullptr");
+    }
 }
 
 float w1Buss::readTemperature(const std::string & ROM)
 {
+    /*here todo later array will be faster*/
+    std::vector<uint8_t> rawTemperature;
+
     SHTLogger()->trace("readTemperature()] start, ROM [{}]", ROM);
     resetBuss();
-    //_ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::matchRom));
-    m_ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::scipRom));
-    //for(const auto & c : ROM)
-    //    _ds2482->W1Writebit(c == '1');
-    m_ds2482->W1WriteByte(static_cast<uint8_t>(W1MemoryCommands::convertT));
-    
-    resetBuss();
-    //_ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::matchRom));
-    m_ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::scipRom));
-    //for(const auto & c : ROM)
-    //    _ds2482->W1Writebit(c == '1');
-    m_ds2482->W1WriteByte(static_cast<uint8_t>(W1MemoryCommands::readScratchpad));
-    std::vector<uint8_t> rawTemperature;
-    int count = 0;
-    while (count <= 8)
+    if (auto ds2482 = m_ds2482.lock())
     {
-        count += 1;
-        /*todo -add here error cheking*/
-        rawTemperature.push_back(static_cast<uint8_t>(m_ds2482->W1ReadByte()));
+        ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::scipRom));
+        ds2482->W1WriteByte(static_cast<uint8_t>(W1MemoryCommands::convertT));
+    }
+    resetBuss();
+    if (auto ds2482 = m_ds2482.lock())
+    {
+        //_ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::matchRom));
+        ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::scipRom));
+        //for(const auto & c : ROM)
+        //    _ds2482->W1Writebit(c == '1');
+        ds2482->W1WriteByte(static_cast<uint8_t>(W1MemoryCommands::readScratchpad));
+
+        int count = 0;
+        while (count <= 8)
+        {
+            count += 1;
+            /*todo -add here error cheking*/
+            rawTemperature.push_back(static_cast<uint8_t>(ds2482->W1ReadByte()));
+        }
     }
     resetBuss();
     float temperature = 0;

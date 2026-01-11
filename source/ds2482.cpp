@@ -38,7 +38,8 @@ ssize_t DS2482::wait1WireIdle()
     SHTLogger()->trace(m_logPrefix + "wait1WireIdle() - start");
     ssize_t result = -1;
     int retries = 0;
-    if (selectRegister(REGISTER::PTR_CODE_STATUS)){
+    if (selectRegister(REGISTER::PTR_CODE_STATUS))
+    {
         if (auto io = m_ds2482.lock())
             result = io->readByte();
         while(result >= 0 && (result & static_cast<ssize_t>(SRBD::STS_1WB)) && retries < 500)
@@ -47,14 +48,19 @@ ssize_t DS2482::wait1WireIdle()
                 result = io->readByte();
             retries += 1;
         }
-    } else {
+    }
+    else
+    {
         retries = 500;
     }
 
-    if(retries < 500){
+    if(retries < 500)
+    {
         SHTLogger()->trace(m_logPrefix + "1wire buss ready");
         return result;
-    } else {
+    }
+    else
+    {
         SHTLogger()->error(m_logPrefix + "1wire buss not ready");
         return -1;
     }
