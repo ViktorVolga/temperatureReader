@@ -33,12 +33,14 @@ bool RomFinder::getNextBit(int step, int round)
             return false;
         }
     }
+    SHTLogger()->info("No potential roms - return true");
     return true;
 }
 
 void RomFinder::resolveAnswer(ssize_t answer)
 {
     bool romAlreadyFounded = false;
+    SHTLogger()->info("answer {}", answer);
     if((!(answer & 0x01)) && (!(answer & 0x02))){
         /*here we know what we have 2 devise with current base*/
         for(const auto & rom : m_foundedRoms)
@@ -64,6 +66,7 @@ void RomFinder::resolveAnswer(ssize_t answer)
         if(!romAlreadyFounded && (m_currentStep + 1) < 64)
         {
 //            m_romsForVerification.push_back(m_currentRom + '0');
+            SHTLogger()->info("romAlreadyFounded -false, m_currentStep {}", m_currentStep);
             m_romsForVerification.push_back(std::make_pair(m_currentRom, m_currentStep));
         }
     }
@@ -133,4 +136,5 @@ void RomFinder::setBit(uint64_t& rom, int step)
         return;
     }
     rom |= (1ULL << (63 -step));
+    SHTLogger()->info("rom after set bit {}", rom);
 }
