@@ -12,6 +12,7 @@
 #include <functional>
 
 #include <mutex>
+#include <spdlog/common.h>
 
 /*
     todo list
@@ -35,7 +36,7 @@ static std::once_flag initFlag;
 
 static void initSHTReaderLogger(){
     spdlog::sink_ptr console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    console_sink->set_level(spdlog::level::trace);
+    console_sink->set_level(spdlog::level::debug);
 
 //    spdlog::sink_ptr file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("/var/log/sh/sh-temperature-reader.log", true);
 //    file_sink->set_level(spdlog::level::debug);
@@ -44,7 +45,7 @@ static void initSHTReaderLogger(){
         
     spdlog::logger logger("SHTReaderLogger", sink_list.begin(), sink_list.end());
 
-    logger.set_level(spdlog::level::trace);
+    logger.set_level(spdlog::level::debug);
 
     SHTReaderLogger_ptr = std::make_unique<spdlog::logger>(logger);
 }

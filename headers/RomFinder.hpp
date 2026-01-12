@@ -17,7 +17,7 @@ class RomFinder
 {
     /*storage for founded roms*/
     std::vector <uint64_t> m_roms;
-    uint64_t m_currentRom;
+    std::string m_currentRom{};
     int m_currentStep = 0;
     std::weak_ptr<iDS2482> m_ds2482;
     int m_currentRound = 0;

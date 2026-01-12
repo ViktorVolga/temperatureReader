@@ -40,49 +40,53 @@ bool RomFinder::getNextBit(int step, int round)
 
 void RomFinder::resolveAnswer(ssize_t answer)
 {
-    bool romAlreadyFounded = false;
     SHTLogger()->info("answer {}", answer);
-    if((!(answer & 0x01)) && (!(answer & 0x02))){
-        /*here we know what we have 2 devise with current base*/
-        for(const auto & rom : m_foundedRoms)
-        {
-//            if(rom.find(m_currentRom + '0') == 0)
-//                romAlreadyFounded = true;
-            if(isEqual(rom, m_currentRom, m_currentStep))
-            {
-                romAlreadyFounded = true;
-            }
-        }
-        for(const auto & rom : m_romsForVerification)
-        {
-//            if(rom.find(m_currentRom + '0') == 0)
-//            {
-//                romAlreadyFounded = true;
-//            }
-            if(isEqual(m_currentRom, rom.first, m_currentStep))
-            {
-                romAlreadyFounded = true;
-            }
-        }
-        if(!romAlreadyFounded && (m_currentStep + 1) < 64)
-        {
-//            m_romsForVerification.push_back(m_currentRom + '0');
-            SHTLogger()->info("romAlreadyFounded -false, m_currentStep {}", m_currentStep);
-            m_romsForVerification.push_back(std::make_pair(m_currentRom, m_currentStep));
-        }
-    }
-
-    if (answer & 4)
+    if (answer == 2)
     {
-        setBit(m_currentRom, m_currentStep);
+        //all devices has 1 bit in this possition
+        m_currentRom.push_back('1');
     }
+    else if (answer == 5)
+    {
+        //all devices has '0' bit in this possition
+        m_currentRom.push_back('0');
+    }
+    else if (answer == 3)
+    {
+        //no devices left on buss
+    } 
+    //bool romAlreadyFounded = false;
+    //SHTLogger()->info("answer {}", answer);
+    //if((!(answer & 0x01)) && (!(answer & 0x02))){
+    //    /*here we know what we have 2 devise with current base*/
+    //    for(const auto & rom : m_foundedRoms)
+    //    {
+    //        if(isEqual(rom, m_currentRom, m_currentStep))
+    //        {
+    //            romAlreadyFounded = true;
+    //        }
+    //    }
+    //    for(const auto & rom : m_romsForVerification)
+    //    {
+    //        if(isEqual(m_currentRom, rom.first, m_currentStep))
+    //        {
+    //            romAlreadyFounded = true;
+    //        }
+    //    }
+    //    if(!romAlreadyFounded && (m_currentStep + 1) < 64)
+    //    {
+    //        SHTLogger()->info("romAlreadyFounded -false, m_currentStep {}", m_currentStep);
+    //        m_romsForVerification.push_back(std::make_pair(m_currentRom, m_currentStep));
+    //    }
+    //}
 }
 
 void RomFinder::findRoms()
 {
     if (auto ds2482 = m_ds2482.lock())
     {
-        ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::matchRom));
+        ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::searchRom));
+        SHTLogger()->info("searchRom command sended");
     }
     while(true)
     {
@@ -95,13 +99,13 @@ void RomFinder::findRoms()
             resolveAnswer(ds2482->W1Triplet(getNextBit(m_currentStep, m_currentRound)));
         }
         m_currentStep++;
-        if(m_currentStep >= 63)
+        if(m_currentStep >= 71)
         {
             SHTLogger()->info("Founded rom {}", m_currentRom);
             m_currentRound++;
-            m_foundedRoms.insert(m_currentRom);
+//            m_foundedRoms.insert(m_currentRom);
             m_currentStep = 0;
-            m_currentRom = 0;
+//            m_currentRom = 0;
             if(m_currentRound > m_romsForVerification.size())
             {
                 break;
@@ -109,7 +113,7 @@ void RomFinder::findRoms()
             if (auto ds2482 = m_ds2482.lock())
             {
                 ds2482->W1ResetBus();
-                ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::matchRom));
+//                ds2482->W1WriteByte(static_cast<uint8_t>(W1Commands::searchRom));
             }
         }
     }

@@ -121,9 +121,11 @@ ssize_t DS2482::W1Triplet(bool bit)
 
 void DS2482::W1WriteByte(uint8_t byte)
 {
+    SHTLogger()->trace(m_logPrefix + "1W1WriteByte - start");
     wait1WireIdle();
     if(auto io = m_ds2482.lock())
         io->writeByteToAddress(static_cast<uint8_t>(COMMANDS::ONE_WIRE_WRITE_BYTE), byte);
+    SHTLogger()->trace(m_logPrefix + "1W1WriteByte - end");
 }
 
 ssize_t DS2482::W1ReadByte()
